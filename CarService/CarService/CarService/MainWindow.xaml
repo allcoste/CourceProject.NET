@@ -7,6 +7,10 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <StatusBar>
+            <Button Content="Кнопка 1"></Button>
+            
+        </StatusBar>
+
     </Grid>
 </Window>

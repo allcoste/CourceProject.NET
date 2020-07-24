@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CarService.DataAccess;
+using CarService.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +22,16 @@ namespace CarService {
     public partial class MainWindow : Window {
         public MainWindow() {
             InitializeComponent();
+
+            using (CarServiceDbContext db = new CarServiceDbContext()) {
+
+                List<Specialty> specialties = db.Specialties.ToList();
+
+                specialties.ForEach(sp => txb.Text += $"{sp.Profession}\n");
+
+                //db.Specialties.Add(new Specialty { Profession = "Шиномонтажник" });
+                //db.SaveChanges();
+            }
         }
     }
 }

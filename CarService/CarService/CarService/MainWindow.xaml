@@ -6,11 +6,8 @@
         xmlns:local="clr-namespace:CarService"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <StatusBar>
-            <Button Content="Кнопка 1"></Button>
-            
-        </StatusBar>
-
+    <Grid Background="Azure">
+        <TextBox Name="txb" Width="600" Height="300" HorizontalAlignment="Center"></TextBox>
+      
     </Grid>
 </Window>

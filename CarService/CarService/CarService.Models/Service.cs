@@ -14,6 +14,9 @@ namespace CarService.Models {
         public string Name { get; set; } // описание услуги
         public float Cost { get; set; } // стоимость услуги
 
+        // компетентная специальность для оказания данной услуги
+        public virtual Specialty Specialty { get; set; }
+
         // коллекция сервисных листов, в которых оказывалась данная услуга
         public virtual ICollection<ServiceSheet> ServiceSheets { get; set; }
 

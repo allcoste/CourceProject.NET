@@ -12,7 +12,10 @@ namespace CarService.DataAccess
     // контекст для взаимодействия с базой данных
     public class CarServiceDbContext : DbContext {
 
-        public CarServiceDbContext() : base("dbContext") { }
+        // вызов инициализатора бд
+        static CarServiceDbContext() { Database.SetInitializer(new CarServiceDbInitializer()); }
+
+        public CarServiceDbContext() : base("DBConnection") { }
         public CarServiceDbContext(string connectionString) : base(connectionString) { }
 
         // наборы сущностей, хранящихся в базе данных
@@ -35,24 +38,20 @@ namespace CarService.DataAccess
             modelBuilder.Entity<Brand>()
                 .Property(br => br.Name)
                 .IsRequired()
-                .IsUnicode()
-                .HasMaxLength(50)
-                .HasColumnName("Mark");
+                .HasMaxLength(50);
             modelBuilder.Entity<Brand>()
                 .HasMany(br => br.Cars)
-                .WithRequired(br => br.Brand);
+                .WithRequired(c => c.Brand);
             #endregion
 
             #region Таблица автомобилей
             modelBuilder.Entity<Car>()
                 .Property(c => c.Model)
                 .IsRequired()
-                .IsUnicode()
                 .HasMaxLength(50);
             modelBuilder.Entity<Car>()
                .Property(c => c.Color)
                .IsRequired()
-               .IsUnicode()
                .HasMaxLength(50);
             modelBuilder.Entity<Car>()
                .Property(c => c.Year)
@@ -60,33 +59,28 @@ namespace CarService.DataAccess
             modelBuilder.Entity<Car>()
                .Property(c => c.RegNumber)
                .IsRequired()
-               .IsUnicode()
                .HasMaxLength(6);
             modelBuilder.Entity<Car>()
                 .HasMany(c => c.Acts)
-                .WithRequired(c => c.Car);
+                .WithRequired(act => act.Car);
             #endregion
 
             #region Таблица людей
             modelBuilder.Entity<Person>()
                 .Property(p => p.Surname)
                 .IsRequired()
-                .IsUnicode()
                 .HasMaxLength(50);
             modelBuilder.Entity<Person>()
                 .Property(p => p.Name)
                 .IsRequired()
-                .IsUnicode()
                 .HasMaxLength(50);
             modelBuilder.Entity<Person>()
                 .Property(p => p.Patronymic)
                 .IsRequired()
-                .IsUnicode()
                 .HasMaxLength(50);
             modelBuilder.Entity<Person>()
                 .Property(p => p.Passport)
                 .IsRequired()
-                .IsUnicode()
                 .HasMaxLength(8);
             modelBuilder.Entity<Person>()
                 .Property(p => p.DateOfBirth)
@@ -94,36 +88,37 @@ namespace CarService.DataAccess
             modelBuilder.Entity<Person>()
                 .Property(p => p.Registration)
                 .IsRequired()
-                .IsUnicode()
                 .HasMaxLength(100);
             modelBuilder.Entity<Person>()
                 .HasMany(p => p.Cars)
-                .WithRequired(p => p.Owner);
+                .WithRequired(c => c.Owner);
             #endregion
 
             #region Таблица клиентов
             modelBuilder.Entity<Client>()
                 .Property(c => c.PhoneNumber)
                 .IsRequired()
-                .IsUnicode()
-                .HasMaxLength(14);
+                .HasMaxLength(13);
             modelBuilder.Entity<Client>()
                 .HasRequired(c => c.Person)
-                .WithOptional(c => c.Client);
+                .WithOptional(p => p.Client);
             modelBuilder.Entity<Client>()
                 .HasMany(c => c.Acts)
-                .WithRequired(c => c.Client);
+                .WithRequired(act => act.Client);
             #endregion
 
             #region Таблица специальностей
             modelBuilder.Entity<Specialty>()
                 .Property(sp => sp.Profession)
                 .IsRequired()
-                .IsUnicode()
                 .HasMaxLength(50);
             modelBuilder.Entity<Specialty>()
                 .HasMany(sp => sp.Workers)
-                .WithRequired(sp => sp.Specialty);
+                .WithRequired(w => w.Specialty);
+            modelBuilder.Entity<Specialty>()
+                .HasMany(sp => sp.Services)
+                .WithRequired(srv => srv.Specialty)
+                .WillCascadeOnDelete(false);
             #endregion
 
             #region Таблица работников
@@ -141,35 +136,30 @@ namespace CarService.DataAccess
                 .IsRequired();
             modelBuilder.Entity<Worker>()
                 .HasRequired(w => w.Person)
-                .WithOptional(w => w.Worker);
+                .WithOptional(p => p.Worker);
+            modelBuilder.Entity<Worker>()
+                .HasMany(w => w.ServiceSheets)
+                .WithRequired(ss => ss.Worker);
             #endregion
 
             #region Таблица услуг
             modelBuilder.Entity<Service>()
                 .Property(s => s.Name)
                 .IsRequired()
-                .IsUnicode()
                 .HasMaxLength(40);
             modelBuilder.Entity<Service>()
-               .Property(s => s.Cost)
-               .IsRequired();
-            modelBuilder.Entity<Service>()
-                .HasMany(s => s.ServiceSheets)
-                .WithRequired(s => s.Service);
+                .Property(s => s.Cost)
+                .IsRequired();
             #endregion
 
             #region Таблица запчастей
             modelBuilder.Entity<SparePart>()
                 .Property(sp => sp.Name)
                 .IsRequired()
-                .IsUnicode()
                 .HasMaxLength(40);
             modelBuilder.Entity<SparePart>()
                 .Property(sp => sp.Cost)
                 .IsRequired();
-            modelBuilder.Entity<SparePart>()
-                .HasMany(sp => sp.ServiceSheets)
-                .WithMany(sp => sp.SpareParts);
             #endregion
 
             #region Таблица сервисных листов
@@ -179,6 +169,12 @@ namespace CarService.DataAccess
             modelBuilder.Entity<ServiceSheet>()
                 .Property(ss => ss.Performed)
                 .IsRequired();
+            modelBuilder.Entity<ServiceSheet>()
+                .HasMany(ss => ss.SpareParts)
+                .WithMany(ss => ss.ServiceSheets);
+            modelBuilder.Entity<ServiceSheet>()
+                .HasRequired(ss => ss.Service)
+                .WithMany(srv => srv.ServiceSheets);
             #endregion
 
             #region Таблица актов выполненных работ
@@ -189,16 +185,28 @@ namespace CarService.DataAccess
                 .Property(act => act.RepairCompletionDate)
                 .IsRequired();
             modelBuilder.Entity<ActOfExecutedWorks>()
-                .Property(act => act.RepairCost)
-                .IsRequired();
+                .Ignore(act => act.RepairCost);
             modelBuilder.Entity<ActOfExecutedWorks>()
-                .Property(act => act.CostOfSpareParts)
-                .IsRequired();
+                .Ignore(act => act.CostOfSpareParts);
             modelBuilder.Entity<ActOfExecutedWorks>()
                 .HasMany(act => act.ServiceSheets)
                 .WithRequired(act => act.Act);
             #endregion
 
+            #region Настройка уникальных столбцов
+            modelBuilder.Entity<Brand>()
+                .HasIndex(br => br.Name).IsUnique();
+            modelBuilder.Entity<Car>()
+                .HasIndex(c => c.RegNumber).IsUnique();
+            modelBuilder.Entity<Person>()
+                .HasIndex(p => p.Passport).IsUnique();
+            modelBuilder.Entity<Specialty>()
+                .HasIndex(sp => sp.Profession).IsUnique();
+            modelBuilder.Entity<Service>()
+                .HasIndex(s => s.Name).IsUnique();
+            modelBuilder.Entity<SparePart>()
+                .HasIndex(s => s.Name).IsUnique();
+            #endregion
 
             base.OnModelCreating(modelBuilder);
         }

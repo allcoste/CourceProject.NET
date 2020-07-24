@@ -105,6 +105,16 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CarService.DataAccess\CarService.DataAccess.csproj">
+      <Project>{e87f7418-1804-4d76-b8ad-2281d9ed0086}</Project>
+      <Name>CarService.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CarService.Models\CarService.Models.csproj">
+      <Project>{e41bd522-2812-47a9-8eb7-36a44cd5b2e0}</Project>
+      <Name>CarService.Models</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

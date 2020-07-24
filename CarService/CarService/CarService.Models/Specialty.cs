@@ -16,9 +16,13 @@ namespace CarService.Models {
         // коллекция работников, принадлежащих данной профессии 
         public virtual ICollection<Worker> Workers { get; set; }
 
+        // коллекция компетентных услуг специальности 
+        public virtual ICollection<Service> Services { get; set; }
+
         public Specialty() {
 
             Workers = new HashSet<Worker>();
+            Services = new HashSet<Service>();
 
         }
 

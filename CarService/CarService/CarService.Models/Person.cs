@@ -23,7 +23,7 @@ namespace CarService.Models {
         public virtual Client Client { get; set; }
         public virtual Worker Worker { get; set; }
 
-        // Коллекция автомобилей, владельцем которой является данная персона
+        // Коллекция автомобилей, владельцем которых является данная персона
         public virtual ICollection<Car> Cars { get; set; }
 
         public Person() {
